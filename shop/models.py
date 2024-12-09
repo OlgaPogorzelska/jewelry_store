@@ -6,13 +6,18 @@ class CustomerUser(AbstractUser):
     """
         Custom user model for a jewelry store.
     """
+    email = models.EmailField(unique=True)
     phone_number = models.CharField(max_length=9, unique=True, null=True)
     street = models.CharField(max_length=255, null=True)
     house_number = models.CharField(max_length=10, null=True)
     apartment_number = models.CharField(max_length=10, blank=True, null=True)
     city = models.CharField(max_length=100, null=True)
-    postal_code = models.CharField(max_length=20, null=True)
+    postal_code = models.CharField(max_length=6, null=True)
     country = models.CharField(max_length=100, null=True, default="Poland")
+
+    USERNAME_FIELD = "email"
+
+    REQUIRED_FIELDS = ["username"]
 
     @property
     def full_street(self):
