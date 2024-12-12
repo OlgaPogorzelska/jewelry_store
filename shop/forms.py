@@ -24,12 +24,12 @@ class RegistrationUserForm(forms.ModelForm):
         pwd1 = cd.get('password')
         pwd2 = cd.get('confirm_password')
         if pwd1 and pwd2 and pwd1 != pwd2:
-            raise ValidationError('The passwords are not the same')
+            self.add_error('confirm_password', 'The passwords are not the same')
 
         p_code = cd.get('postal_code')
         if p_code and not is_valid_postal_code(p_code):
-            raise ValidationError("Postal code must be in the"
-                                  " format 'XX-XXX'.")
+            self.add_error('postal_code', '''Postal code must be in the
+                                  format 'XX-XXX'. ''')
 
         f_name = cd.get('first_name')
         l_name = cd.get('last_name')
@@ -38,25 +38,28 @@ class RegistrationUserForm(forms.ModelForm):
         apartment_num = cd.get('apartment_number')
         city = cd.get('city')
         country = cd.get('country')
+        phone_number = cd.get('phone_number')
 
         if f_name and not f_name.isalpha():
-            raise ValidationError('First name must contain only letters.')
+            self.add_error('first_name', 'First name must contain only letters.')
         if l_name and not l_name.isalpha():
-            raise ValidationError('Last name must contain only letters.')
+            self.add_error('last_name', 'Last name must contain only letters.')
+        if phone_number and not phone_number.isdigit():
+            self.add_error('phone_number', 'Phone number must contain only digits.')
         if street and not validate_street_name(street):
-            raise ValidationError('Street name must contain only letters,'
-                                  ' spaces, and optional numbers at the end. '
-                                  'Example: "Jana Pawła II", "Dywizjonu 303".')
+            self.add_error('street', '''Street name must contain only letters,
+                                  spaces, and optional numbers at the end. 
+                                  Example: "Jana Pawła II", "Dywizjonu 303".''')
         if house_num and not validate_house_number(house_num):
-            raise ValidationError('House number must be a number'
-                                  'with an optional letter at the end.'
-                                  ' Examples: "123", "456A".')
+            self.add_error('house_number', '''House number must be a number
+                                  with an optional letter at the end.
+                                  Examples: "123", "456A".''')
         if apartment_num and apartment_num and not apartment_num.isdigit():
-            raise ValidationError('Apartment number must contain only number.')
+            self.add_error('apartment_number', 'Apartment number must contain only number.')
         if city and not city.isalpha():
-            raise ValidationError('City name must contain only letters.')
+            self.add_error('city', 'City name must contain only letters.')
         if country and not country.isalpha():
-            raise ValidationError('Country name must contain only letters. ')
+            self.add_error('country', 'Country name must contain only letters. ')
         return cd
 
 
@@ -103,10 +106,7 @@ class UserLoginForm(forms.Form):
         pwd = cd.get('password')
         user = authenticate(username=email, password=pwd)
         if user is None:
-            raise ValidationError('You entered the wrong '
-                                  'password or login!')
+            raise ValidationError('''You entered the wrong 
+                                  password or login!''')
         else:
             self.user = user
-
-
-
