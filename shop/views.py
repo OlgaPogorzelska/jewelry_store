@@ -12,13 +12,13 @@ class StartView(View):
     """
 
     def get(self, request, *args, **kwargs):
-        return render(request, 'base.html')
+        return render(request, 'main.html')
 
 
 class RegistrationView(CreateView):
     form_class = RegistrationUserForm
     template_name = 'registration.html'
-    success_url = reverse_lazy('base_view')
+    success_url = reverse_lazy('main_view')
 
     def form_valid(self, form):
         user = form.save(commit=False)
@@ -30,7 +30,7 @@ class RegistrationView(CreateView):
 class UserLoginView(FormView):
     form_class = UserLoginForm
     template_name = 'login.html'
-    success_url = reverse_lazy('base_view')
+    success_url = reverse_lazy('main_view')
 
     def form_valid(self, form):
         login(self.request, form.user)
@@ -40,4 +40,4 @@ class UserLoginView(FormView):
 class LogoutView(View):
     def get(self, request, *args, **kwargs):
         logout(request)
-        return redirect('login_view')
+        return redirect('main_view')

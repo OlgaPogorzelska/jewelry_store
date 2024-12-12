@@ -6,7 +6,8 @@
         {% if form.non_field_errors %}
             <div class="error">{{ form.non_field_errors }}</div>
         {% endif %}
-        <input type="submit" value="send">
+        <input type="submit" value="Login">
+        <a href="{% url 'register_view' %}">I don't have account</a>
     </form>
 {% endblock %}
 
