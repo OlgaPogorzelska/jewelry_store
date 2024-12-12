@@ -1,0 +1,18 @@
+# Ignoruj foldery cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignoruj pliki logów
+*.log
+
+# Ignoruj migracje
+db.sqlite3
+migrations/
+
+# Ignoruj pliki środowiska wirtualnego
+env3/
+
+# Ignoruj pliki systemowe
+.DS_Store

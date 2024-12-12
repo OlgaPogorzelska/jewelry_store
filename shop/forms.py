@@ -93,5 +93,20 @@ def validate_street_name(street):
     return re.match(pattern, street)
 
 
+class UserLoginForm(forms.Form):
+    email = forms.CharField()
+    password = forms.CharField(widget=forms.PasswordInput)
+
+    def clean(self):
+        cd = super().clean()
+        email = cd.get('email')
+        pwd = cd.get('password')
+        user = authenticate(username=email, password=pwd)
+        if user is None:
+            raise ValidationError('You entered the wrong '
+                                  'password or login!')
+        else:
+            self.user = user
+
 
 
