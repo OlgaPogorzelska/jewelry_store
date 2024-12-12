@@ -21,7 +21,7 @@ from shop import views as views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.StartView.as_view(), name='base_view'),
+    path('', views.StartView.as_view(), name='main_view'),
     path('register/', views.RegistrationView.as_view(), name='register_view'),
     path('login/', views.UserLoginView.as_view(), name='login_view'),
     path('logout/', views.LogoutView.as_view(), name='logout'),
