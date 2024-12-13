@@ -1,0 +1,12 @@
+{%  extends 'shop/base.html' %}
+{% block content %}
+    {% if user.is_authenticated %}
+        <h1>Szczegóły konta użytkownika</h1>
+        <p>Imię: {{user.first_name}}</p>
+        <p>Nazwisko: {{user.last_name}}</p>
+        <p>Email: {{user.email}}</p>
+        <p>Telefon: {{ user.phone_number }}</p>
+        <p>Adres: ul.{{user.full_street}}, {{user.postal_code}} {{user.city}} {{user.country}}</p>
+        <a href="{% url 'update_user' user.pk %}">Edit</a>
+    {% endif %}
+{% endblock %}

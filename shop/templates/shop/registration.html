@@ -1,12 +1,12 @@
-{%  extends 'base.html' %}
+{%  extends 'shop/base.html' %}
 {% block content %}
 <h1>Rejestracja</h1>
 <form action="" method="post">
     {% csrf_token %}
     {{ form.as_p }}
     {%for field in form %}
-        {% for error in form %}
-            <div>{{error}}</div>
+        {% for error in field.errors %}
+            <div class="error">{{ error }}</div>
         {% endfor %}
     {% endfor %}
     <button type="submit">Signup</button>
