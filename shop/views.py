@@ -84,8 +84,21 @@ class ChangeUserPasswordView(LoginRequiredMixin, PasswordChangeView):
 
 class ProductsListView(ListView):
     model = Product
-    context_object_name = 'products'
     template_name = 'shop/product_list.html'
+    context_object_name = 'products'
+
+    def get_queryset(self):
+        category_id = self.kwargs['pk']  # Pobranie ID kategorii z URL
+        return Product.objects.filter(category_id=category_id).select_related('category')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        category = Category.objects.get(pk=self.kwargs['pk'])
+        context['category'] = self.get_object()
+        return context
+
+    def get_object(self, queryset=None):
+        return Category.objects.get(pk=self.kwargs['pk'])
 
 
 class ProductView(DetailView):

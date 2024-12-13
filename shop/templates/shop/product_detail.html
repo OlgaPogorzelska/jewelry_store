@@ -1,6 +1,5 @@
 {%  extends 'shop/base.html' %}
 {% block content %}
-    {% if user.is_authenticated %}
         <h1>{{product.name}}</h1>
         <div>
             {% for image in images %}
@@ -11,5 +10,4 @@
         <p>Opis: {{product.description}}</p>
 
 
-    {% endif %}
 {% endblock %}
