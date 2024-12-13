@@ -6,7 +6,7 @@ from django.contrib.auth import login, logout, update_session_auth_hash
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import PasswordChangeView, PasswordResetView
 from shop.forms import RegistrationUserForm, UserLoginForm
-from shop.models import CustomerUser
+from shop.models import CustomerUser, Category, Product, ProductImages
 
 
 class StartView(View):
@@ -15,7 +15,8 @@ class StartView(View):
     """
 
     def get(self, request, *args, **kwargs):
-        return render(request, 'shop/main.html')
+        categories = Category.objects.all()
+        return render(request, 'shop/main.html', {'categories': categories})
 
 
 class RegistrationView(CreateView):
@@ -73,3 +74,26 @@ class ChangeUserPasswordView(LoginRequiredMixin, PasswordChangeView):
 # class ResetUserPasswordView(PasswordResetView): Do zrobienia pózniej
 #     template_name = 'shop/reset_pwd.html'
 #     success_url = reverse_lazy('main_view')
+
+
+# class CategoryView(ListView):
+#     model = Category
+#     context_object_name = 'categories'
+#     template_name = 'shop/category.html'
+#
+
+class ProductsListView(ListView):
+    model = Product
+    context_object_name = 'products'
+    template_name = 'shop/product_list.html'
+
+
+class ProductView(DetailView):
+    model = Product
+    template_name = 'shop/product_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['product'] = self.get_object()
+        context['images'] = ProductImages.objects.filter(product=self.object)
+        return context

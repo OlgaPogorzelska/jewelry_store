@@ -1,0 +1,15 @@
+{%  extends 'shop/base.html' %}
+{% block content %}
+    {% if user.is_authenticated %}
+        <h1>{{product.name}}</h1>
+        <div>
+            {% for image in images %}
+                <img src="{{ image.image.url }}" alt="{{ product.name }}" style="max-width: 200px; max-height: 200px;"/>
+            {% endfor %}
+        </div>
+        <p>Cena: {{product.price}}</p>
+        <p>Opis: {{product.description}}</p>
+
+
+    {% endif %}
+{% endblock %}

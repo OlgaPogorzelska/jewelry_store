@@ -3,7 +3,7 @@ import re
 
 from django.contrib.auth import authenticate
 from django.core.exceptions import ValidationError
-from shop.models import CustomerUser
+from shop.models import CustomerUser, Product, Category, ProductImages
 
 
 class RegistrationUserForm(forms.ModelForm):
