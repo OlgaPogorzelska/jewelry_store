@@ -209,3 +209,4 @@ def test_logout(client, kamil):
 
     assert response.status_code == 302
     assert not response.wsgi_request.user.is_authenticated
+
