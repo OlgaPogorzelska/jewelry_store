@@ -16,7 +16,7 @@ class StartView(View):
 
     def get(self, request, *args, **kwargs):
         categories = Category.objects.all()
-        return render(request, 'shop/main.html', {'categories': categories})
+        return render(request, 'shop/base.html', {'categories': categories})
 
 
 class RegistrationView(CreateView):
