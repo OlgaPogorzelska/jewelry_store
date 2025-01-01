@@ -8,6 +8,11 @@
         </div>
         <p>Cena: {{product.price}}</p>
         <p>Opis: {{product.description}}</p>
+        <form method="post" action="{% url 'add_to_cart' product.pk %}">
+            {% csrf_token %}
+        <button type="submit">Dodaj do koszyka</button>
+</form>
+
 
 
 {% endblock %}

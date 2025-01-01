@@ -21,6 +21,7 @@ from django.urls import path
 from django.contrib.auth import views as auth_views
 
 from shop import views as views
+from cart import views as carts
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -34,6 +35,9 @@ urlpatterns = [
     # path('category/', views.CategoryView.as_view(), name='category'),
     path('category/<int:pk>', views.ProductsListView.as_view(), name='products_list'),
     path('product/<int:pk>', views.ProductView.as_view(), name='product_details'),
+    path('cart/add/<int:pk>', carts.AddToCart.as_view(), name='add_to_cart'),
+    path('cart/<int:pk>', carts.CartView.as_view(), name='cart_details'),
+    path('cart/remove/<int:pk>', carts.RemoveFromCart.as_view(), name='remove_from_cart'),
 
 ]
 
