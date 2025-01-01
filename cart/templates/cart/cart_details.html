@@ -1,0 +1,39 @@
+{% extends 'cart/base.html' %}
+
+{% block content %}
+
+<form method="post">
+    {% csrf_token %}
+    {% if user.is_authenticated %}
+    <table>
+        <tr>
+            <th>Img</th>
+            <th>Nazwa</th>
+            <th>Ilość</th>
+            <th>Suma</th>
+            <th></th>
+        </tr>
+            {% for item in cart_items %}
+        <tr>
+            <td><img src="{{ item.product.productimages_set.first.image.url  }}" alt="{{ item.product.name }}"
+                     style="max-width: 100px; max-height: 100px;"/></td>
+            <td>{{ item.product.name }}</td>
+            <td>
+                <input type="hidden" name="item_pk_{{ forloop.counter }}" value="{{ item.pk }}">
+                <input type="number" name="quantity_{{ forloop.counter }}" value="{{ item.quantity }}" min="1" />
+            </td>
+            <td>{{ item.get_total_price }} zł</td>
+            <td><a href="{% url 'remove_from_cart' item.pk %}">X</a></td>
+        </tr>
+        {% empty %}
+        <p>Twój koszyk jest pusty.</p>
+        {% endfor %}
+        </table>
+        <input type="submit" value="Zaktualizuj ilości">
+        <h2>Suma koszyka: {{cart.get_total_price_cart}} zł </h2>
+        {% else %}
+        <p>Musisz być zalogowany, aby zobaczyć swój koszyk.</p>
+        {% endif %}
+        <a href="{% url 'main_view' %}">Wróć do sklepu</a>
+</form>
+{% endblock %}

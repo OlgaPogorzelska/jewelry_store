@@ -107,6 +107,6 @@ class ProductView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['product'] = self.get_object()
+        # context['product'] = self.get_object() nie potrzebuje bo DetailView sama mi to zrobi
         context['images'] = ProductImages.objects.filter(product=self.object)
         return context
