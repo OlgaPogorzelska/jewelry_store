@@ -1,11 +1,18 @@
 from django.db import models
 from shop.models import CustomerUser, Product
 
+SIZE = (
+    ("S", "S"),
+    ("M", "M"),
+    ("L", "L"),
+)
+
 
 class CartItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
     cart = models.ForeignKey('Cart', on_delete=models.CASCADE)
+    size = models.CharField(choices=SIZE, max_length=1, blank=True, null=True)
 
     def __str__(self):
         return f"{self.product.name} x {self.quantity}"
@@ -23,8 +30,3 @@ class Cart(models.Model):
 
     def get_total_price_cart(self):
         return sum(item.get_total_price() for item in self.cartitem_set.all())
-
-
-
-
-

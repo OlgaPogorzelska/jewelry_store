@@ -8,11 +8,20 @@
         </div>
         <p>Cena: {{product.price}}</p>
         <p>Opis: {{product.description}}</p>
-        <form method="post" action="{% url 'add_to_cart' product.pk %}">
-            {% csrf_token %}
-        <button type="submit">Dodaj do koszyka</button>
-</form>
 
+        <form method="post" action="{% url 'add_to_cart' product.pk %}">
+            {% if product.category.name == "PIERŚCIONKI" %}
+            {% csrf_token %}
+            <label for="size">Wybierz rozmiar:</label>
+            <select name="size" id="size" required>
+                <option value="">-- Wybierz rozmiar --</option>
+                {% for size in SIZE %}
+                    <option value="{{ size.0 }}">{{ size.1 }}</option>
+                {% endfor %}
+            </select>
+            {% endif %}
+            <button type="submit">Dodaj do koszyka</button>
+        </form>
 
 
 {% endblock %}
