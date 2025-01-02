@@ -6,7 +6,7 @@ from django.contrib.auth import login, logout, update_session_auth_hash
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import PasswordChangeView, PasswordResetView
 from shop.forms import RegistrationUserForm, UserLoginForm
-from shop.models import CustomerUser, Category, Product, ProductImages
+from shop.models import CustomerUser, Category, Product, ProductImages, SIZE
 
 
 class StartView(View):
@@ -109,4 +109,5 @@ class ProductView(DetailView):
         context = super().get_context_data(**kwargs)
         # context['product'] = self.get_object() nie potrzebuje bo DetailView sama mi to zrobi
         context['images'] = ProductImages.objects.filter(product=self.object)
+        context['SIZE'] = SIZE
         return context

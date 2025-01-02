@@ -9,13 +9,13 @@ from cart.models import Cart, CartItem
 from shop.models import Product
 
 
-# Create your views here.
-
 class AddToCart(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
         pk = self.kwargs['pk']
         product = get_object_or_404(Product, pk=pk)
+
+        size = request.Post.get('size') if product.category.name == "PIERŚCIONKI" else None
 
         cart, created = Cart.objects.get_or_create(user=request.user)
         cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
@@ -49,7 +49,7 @@ class CartView(LoginRequiredMixin, DetailView):
 
                 if quantity and item_pk:
                     cart_item = get_object_or_404(CartItem, pk=item_pk)
-                    cart_item.quantity = int(quantity)  # Zaktualizuj iloquantity
+                    cart_item.quantity = int(quantity)  # Zaktualizuj ilość "quantity"
                     cart_item.save()
 
         return redirect(reverse('cart_details', kwargs={'pk': cart.pk}))
