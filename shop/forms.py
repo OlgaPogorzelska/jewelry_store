@@ -44,3 +44,5 @@ class UserLoginForm(forms.Form):
             self.user = user
 
 
+class SearchForm(forms.Form):
+    search = forms.CharField(max_length=100, required=False)
