@@ -3,7 +3,9 @@
     {% if products %}
     <ul>
       {% for product in products %}
-          <li><a href="{% url 'product_details' product.pk %}" >{{ product.name }}  {{ product.price }}</a></li>
+          <li><img src="{{ product.productimages_set.first.image.url  }}" alt="{{ item.product.name }}"
+                     style="max-width: 300px; max-height: 300px;"/>
+              <a href="{% url 'product_details' product.pk %}" >{{ product.name }}  {{ product.price }}</a></li>
       {% endfor %}
     </ul>
     {% else %}

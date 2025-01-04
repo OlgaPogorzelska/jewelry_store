@@ -1,9 +1,0 @@
-{%  extends 'shop/base.html' %}
-{% block content %}
-    <h1>Koszyk</h1>
-    <ul>
-        {% for cartitem in cartitems %}
-            <li>{{ cartitem }}</li>
-        {% endfor %}
-    </ul>
-{% endblock %}
