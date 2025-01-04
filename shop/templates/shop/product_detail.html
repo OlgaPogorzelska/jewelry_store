@@ -10,8 +10,8 @@
         <p>Opis: {{product.description}}</p>
 
         <form method="post" action="{% url 'add_to_cart' product.pk %}">
-            {% if product.category.name == "PIERŚCIONKI" %}
             {% csrf_token %}
+            {% if product.category.name == "PIERŚCIONKI" %}
             <label for="size">Wybierz rozmiar:</label>
             <select name="size" id="size" required>
                 <option value="">-- Wybierz rozmiar --</option>
@@ -20,7 +20,11 @@
                 {% endfor %}
             </select>
             {% endif %}
+            {% if product.stock == 0 %}
+                <p>Produkt niedostępny</p>
+            {% else %}
             <button type="submit">Dodaj do koszyka</button>
+            {% endif %}
         </form>
 
 

@@ -1,5 +1,5 @@
-from django.shortcuts import render, redirect
-from django.urls import reverse_lazy
+from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse_lazy, reverse
 from django.views import View
 from django.views.generic import CreateView, FormView, ListView, DetailView, UpdateView
 from django.contrib.auth import login, logout, update_session_auth_hash
@@ -7,6 +7,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import PasswordChangeView, PasswordResetView
 from shop.forms import RegistrationUserForm, UserLoginForm
 from shop.models import CustomerUser, Category, Product, ProductImages, SIZE
+from cart.models import Cart, CartItem
 
 
 class StartView(View):
@@ -38,6 +39,27 @@ class UserLoginView(FormView):
 
     def form_valid(self, form):
         login(self.request, form.user)
+
+        #Dodanie produktów z sesji do koszyka
+        if 'cart_items' in self.request.session:
+            cart_items = self.request.session['cart_items']
+            print(self.request.session.get('cart_items', []))
+            cart, carted = Cart.objects.get_or_create(user=form.user)
+            for item_data in cart_items:
+                item_id = item_data.get('pk')
+                size = item_data.get('size')
+                product = get_object_or_404(Product, pk=item_id)
+                CartItem.objects.create(cart=cart, product=product, size=size)
+
+            print(f"Added products from session to cart for user {form.user.email}")
+            #Po dodaniu produktów do koszyka usuwa z sesji
+            del self.request.session['cart_items']
+
+
+        next_url = self.request.GET.get('next')
+        cart = Cart.objects.get(user=form.user)
+        if next_url:
+            return redirect(reverse('cart_details', kwargs={'pk': cart.pk}))
         return super().form_valid(form)
 
 

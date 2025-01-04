@@ -119,7 +119,8 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
-
+LOGIN_URL = '/login/'
+# Ustawienie ścieżki do logowania /loging
 STATIC_URL = 'static/'
 # Ustawienia dla plików mediów
 MEDIA_URL = '/media/'
