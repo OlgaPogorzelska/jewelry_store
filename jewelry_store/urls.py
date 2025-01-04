@@ -38,6 +38,7 @@ urlpatterns = [
     path('cart/add/<int:pk>', carts.AddToCart.as_view(), name='add_to_cart'),
     path('cart/<int:pk>', carts.CartView.as_view(), name='cart_details'),
     path('cart/remove/<int:pk>', carts.RemoveFromCart.as_view(), name='remove_from_cart'),
+    path('search/', views.SearchFormView.as_view(), name='search'),
 
 ]
 

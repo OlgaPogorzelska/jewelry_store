@@ -5,7 +5,7 @@ from django.views.generic import CreateView, FormView, ListView, DetailView, Upd
 from django.contrib.auth import login, logout, update_session_auth_hash
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import PasswordChangeView, PasswordResetView
-from shop.forms import RegistrationUserForm, UserLoginForm
+from shop.forms import RegistrationUserForm, UserLoginForm, SearchForm
 from shop.models import CustomerUser, Category, Product, ProductImages, SIZE
 from cart.models import Cart, CartItem
 
@@ -133,3 +133,19 @@ class ProductView(DetailView):
         context['images'] = ProductImages.objects.filter(product=self.object)
         context['SIZE'] = SIZE
         return context
+
+
+class SearchFormView(View):
+    def get(self, request, *args, **kwargs):
+        form = SearchForm()
+        return render(request, 'shop/search.html', {'form': form})
+
+    def post(self, request, *args, **kwargs):
+        form = SearchForm(request.POST)
+        if form.is_valid():
+            search = form.cleaned_data['search']
+            products = Product.objects.filter(name__icontains=search)
+            categories = Category.objects.filter(name__icontains=search)
+            form = SearchForm()
+            return render(request, 'shop/search.html', {'form': form, 'products': products, 'categories': categories})
+        return render(request, 'shop/search.html', {'form': form})
