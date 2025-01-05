@@ -5,7 +5,7 @@
   <title>UniqOl</title>
 </head>
 <body>
-<h1>UniqOl</h1>
+<a href="{% url 'main_view' %}"><h1>UniqOl</h1></a>
 <ul>
     {% for category in categories %}
           <li><a href="{% url 'products_list' category.pk %}">{{ category.name }}</a></li>

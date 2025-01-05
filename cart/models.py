@@ -49,12 +49,26 @@ class Shipping(models.Model):
     shipping_company = models.CharField(max_length=2, choices=SHIPPING_COMPANIES, default='PP')
     shipping_price = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    order = models.ForeignKey('Order', on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return f"Shipping for {self.user}"
 
+    def save(self, *args, **kwargs):
+        if self.shipping_company == 'PP':
+            self.shipping_price = 15
+        elif self.shipping_company == 'IN':
+            self.shipping_price = 18
+        elif self.shipping_company == 'DP':
+            self.shipping_price = 20
+        super().save(*args, **kwargs)
+
     def get_shipping_price(self):
         return self.shipping_price
+
+    def get_total_price_with_shipping(self):
+        items_total_price = sum(item.get_total_price() for item in self.user.cart.cartitem_set.all())
+        return items_total_price + self.shipping_price
 
     def get_shipping_email(self):
         return self.user.email
@@ -65,3 +79,23 @@ class Shipping(models.Model):
     def get_shipping_address(self):
         """Pobieranie adres użytkownika z modelu User"""
         return f"{self.user.full_street}, {self.user.postal_code} {self.user.city} {self.user.country}"
+
+
+class Order(models.Model):
+    user = models.ForeignKey(CustomerUser, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    total_price = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"Order {self.id} by {self.user}"
+
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.quantity} of {self.product.name} in Order {self.order.id}"
