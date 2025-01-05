@@ -3,10 +3,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import UpdateView, DetailView, DeleteView
+from django.views.generic import UpdateView, DetailView, DeleteView, FormView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import models
-from cart.models import Cart, CartItem
+from cart.models import Cart, CartItem, Shipping, Order
 from shop.models import Product
 
 
@@ -21,7 +21,7 @@ class AddToCart(View):
         # Sprawdzenie, czy użytkownik jest zalogowany
 
         if not request.user.is_authenticated:
-            #Przechowywanie id produktu w sesji
+            # Przechowywanie id produktu w sesji
             if 'cart_items' not in request.session:
                 request.session['cart_items'] = []
 
@@ -31,15 +31,13 @@ class AddToCart(View):
                     item['quantity'] += 1
                     break
 
-            #Dodanie produktu do sesji
+            # Dodanie produktu do sesji
             cart_items.append({"pk": pk, "size": size})
             request.session['cart_items'] = cart_items
             request.session.modified = True
 
-            #Przekierowanie do strony logowania
+            # Przekierowanie do strony logowania
             return redirect(f'{self.login_url}?next={reverse("cart_details", kwargs={"pk": pk})}')
-
-
 
         # Pobranie lub stworzenie koszyka dla zalogowanego użytkownika
         cart, created = Cart.objects.get_or_create(user=request.user)
@@ -69,12 +67,24 @@ class CartView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         context['cart'] = self.get_object()
         context['cart_items'] = CartItem.objects.filter(cart=self.object)
+        context['shipping_options'] = [
+            {'code': 'PP', 'name': 'Poczta Polska', 'price': 15},
+            {'code': 'IN', 'name': 'InPost', 'price': 18},
+            {'code': 'DP', 'name': 'DPD', 'price': 20},
+        ]
+
+        selected_shipping_code = self.request.session.get('shipping_company')
+        selected_shipping_price = next((option['price'] for option in context['shipping_options']
+                                        if option['code'] == selected_shipping_code), 0)
+
+        context['total_price_with_shipping'] = context['cart'].get_total_price_cart() + selected_shipping_price
         return context
 
     def post(self, request, *args, **kwargs):
         pk = self.kwargs['pk']
         cart = get_object_or_404(Cart, pk=pk)
 
+        # Aktualizacja ilości produktów w koszyku
         for key in request.POST:
             if key.startswith('quantity_'):
                 index = key.split('_')[1]
@@ -84,6 +94,7 @@ class CartView(LoginRequiredMixin, DetailView):
                 if quantity and item_pk:
                     cart_item = get_object_or_404(CartItem, pk=item_pk)
                     product = cart_item.product
+
                     # Obliczenie całkowitej ilości produktów w koszyku niezależnie od rozmiaru
                     total_quantity_in_cart = CartItem.objects.filter(cart=cart, product=product).aggregate(
                         total_quantity=models.Sum('quantity')
@@ -92,11 +103,21 @@ class CartView(LoginRequiredMixin, DetailView):
                     planned_total_quantity = total_quantity_in_cart + int(quantity)
 
                     if planned_total_quantity > product.stock:
-                        messages.error(request, f"Ilość {product.name} w koszyku przekracza ilość dostępną w magazynie.")
+                        messages.error(request,
+                                       f"Ilość {product.name} w koszyku przekracza ilość dostępną w magazynie.")
                         return redirect(reverse('cart_details', kwargs={'pk': cart.pk}))
 
                     cart_item.quantity = int(quantity)  # Zaktualizuj ilość "quantity"
                     cart_item.save()
+
+
+        # Dodanie informacji o wysyłce do sessji
+        selected_shipping = request.POST.get('shipping_company')
+        if selected_shipping:
+            request.session['shipping_company'] = selected_shipping
+            print(f"Wybrano firma kurierską: {selected_shipping}")
+            request.session.modified = True
+            messages.success(request, f"Wybrano firmę kurierską: {selected_shipping}")
 
         messages.success(request, "Koszyk został zaktualizowany.")
         return redirect(reverse('cart_details', kwargs={'pk': cart.pk}))
@@ -110,3 +131,12 @@ class RemoveFromCart(LoginRequiredMixin, DetailView):
         cart_pk = self.object.cart.pk
         self.object.delete()
         return redirect(reverse('cart_details', kwargs={'pk': cart_pk}))
+
+
+class ShippingDetailsView(LoginRequiredMixin, FormView):
+    models = Shipping
+    template_name = 'cart/shipping.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context

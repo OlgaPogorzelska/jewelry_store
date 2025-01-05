@@ -17,7 +17,7 @@
         </tr>
         {% for item in cart_items %}
         <tr>
-            <td><img src="{{ item.product.productimages_set.first.image.url  }}" alt="{{ item.product.name }}"
+            <td><img src="{{ item.product.productimages_set.first.image.url }}" alt="{{ item.product.name }}"
                      style="max-width: 100px; max-height: 100px;"/></td>
             <td>{{ item.product.name }}</td>
             <td>
@@ -25,30 +25,35 @@
                 <input type="number" name="quantity_{{ forloop.counter }}" value="{{ item.quantity }}" min="1"/>
             </td>
             <td>{{ item.get_total_price }} zł</td>
-            <td>
-                {% if item.size %}
-                {{ item.size }}
-                {% endif %}
-            </td>
+            <td>{% if item.size %}{{ item.size }}{% endif %}</td>
             <td><a href="{% url 'remove_from_cart' item.pk %}">X</a></td>
         </tr>
         {% empty %}
         <p>Twój koszyk jest pusty.</p>
         {% endfor %}
-        {% if messages %}
-
-            {% for message in messages %}
-            {{ message }}
-            {% endfor %}
-
-        {% endif %}
     </table>
-    <input type="submit" value="Zaktualizuj ilości">
-    <h2>Suma koszyka: {{cart.get_total_price_cart}} zł </h2>
+
+    <h2>Dostawa:</h2>
+    <div class="shipping-options">
+    {% for option in shipping_options %}
+    <label>
+        <input type="radio" name="shipping_company" value="{{ option.code }}"
+               {% if request.session.shipping_company == option.code %}checked{% endif %}
+               onchange="this.form.submit()">
+        <span>{{ option.name }}</span>
+        <span>{{ option.price }} zł </span>
+    </label><br>
+    {% endfor %}
+    </div>
+
+    <h4>Do zapłaty: {{ total_price_with_shipping }} zł</h4>
+    <button type="submit">Zaktualizuj ilości</button>
+
     {% else %}
     <p>Twój koszyk jest pusty.</p>
     {% endif %}
-    <a href="{% url 'main_view' %}">Wróć do sklepu</a>
-    {% endif %}
-</form>
+    </form>
+
+
+{% endif %}
 {% endblock %}
