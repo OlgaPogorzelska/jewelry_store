@@ -1,6 +1,6 @@
 {%  extends 'shop/base.html' %}
 {% block content %}
-    <form action="" method="POST" >
+    <form action="{% url 'login_view' %}" method="POST" >
         {% csrf_token %}
         {{ form.as_p }}
 

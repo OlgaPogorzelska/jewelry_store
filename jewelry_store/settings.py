@@ -116,6 +116,7 @@ USE_I18N = True
 
 USE_TZ = True
 
+CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:8000', 'http://localhost:8000']
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
@@ -124,6 +125,9 @@ LOGIN_URL = '/login/'
 STATIC_URL = 'static/'
 # Ustawienia dla plików mediów
 MEDIA_URL = '/media/'
+# Tylko do testów lokalnych!
+# CSRF_COOKIE_SECURE = False wyłaczenie zabezpieczenie CSRF
+
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Katalog, w którym będą przechowywane przesyłane pliki
 
 # Default primary key field type

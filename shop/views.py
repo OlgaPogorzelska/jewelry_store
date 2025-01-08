@@ -7,7 +7,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import PasswordChangeView, PasswordResetView
 from shop.forms import RegistrationUserForm, UserLoginForm, SearchForm
 from shop.models import CustomerUser, Category, Product, ProductImages, SIZE
-from cart.models import Cart, CartItem
+from cart.models import Cart, CartItem, Order
 
 
 class StartView(View):
@@ -17,7 +17,10 @@ class StartView(View):
 
     def get(self, request, *args, **kwargs):
         categories = Category.objects.all()
-        return render(request, 'shop/base.html', {'categories': categories})
+        cart = None
+        if request.user.is_authenticated:
+            cart, carted = Cart.objects.get_or_create(user=request.user)
+        return render(request, 'shop/base.html', {'categories': categories, 'cart': cart})
 
 
 class RegistrationView(CreateView):
@@ -39,12 +42,11 @@ class UserLoginView(FormView):
 
     def form_valid(self, form):
         login(self.request, form.user)
+        cart, created = Cart.objects.get_or_create(user=form.user)
 
-        #Dodanie produktów z sesji do koszyka
+        # Dodanie produktów z sesji do koszyka
         if 'cart_items' in self.request.session:
             cart_items = self.request.session['cart_items']
-            print(self.request.session.get('cart_items', []))
-            cart, carted = Cart.objects.get_or_create(user=form.user)
             for item_data in cart_items:
                 item_id = item_data.get('pk')
                 size = item_data.get('size')
@@ -52,15 +54,20 @@ class UserLoginView(FormView):
                 CartItem.objects.create(cart=cart, product=product, size=size)
 
             print(f"Added products from session to cart for user {form.user.email}")
-            #Po dodaniu produktów do koszyka usuwa z sesji
-            del self.request.session['cart_items']
 
+            # Po dodaniu produktów do koszyka usuwa z sesji
+            del self.request.session['cart_items']
 
         next_url = self.request.GET.get('next')
         cart = Cart.objects.get(user=form.user)
         if next_url:
             return redirect(reverse('cart_details', kwargs={'pk': cart.pk}))
+        print(f"User {form.user.username} logged in successfully.")
         return super().form_valid(form)
+
+    def form_invalid(self, form):
+        print("Login failed.")
+        return super().form_invalid(form)
 
 
 class LogoutView(View):
@@ -79,13 +86,26 @@ class UserDetailsView(LoginRequiredMixin, DetailView):
         return context
 
 
-class UserUpdateView(LoginRequiredMixin, UpdateView):  # Dodać PermissionRequiredMixin ?
+class UserUpdateView(LoginRequiredMixin, UpdateView):
     model = CustomerUser
     fields = ['first_name', 'last_name', 'email', 'phone_number', 'street',
               'house_number', 'apartment_number', 'city', 'postal_code',
               'country']
     template_name = 'shop/update_user.html'
     success_url = reverse_lazy('main_view')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form_order'] = 'next' in self.request.GET
+        context['minimal_header'] = 'next' in self.request.GET
+        context['order_id'] = self.request.GET.get('next')
+        return context
+
+    def get_success_url(self):
+        next_url = self.request.POST.get('next') or self.request.GET.get('next')
+        if next_url:
+            return next_url
+        return reverse_lazy('main_view')
 
 
 class ChangeUserPasswordView(LoginRequiredMixin, PasswordChangeView):

@@ -52,8 +52,9 @@ class Shipping(models.Model):
     order = models.ForeignKey('Order', on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
-        return f"Shipping for {self.user}"
+        return f"Shipping for {self.user} Order {self.order.id}"
 
+    #mozna usunć
     def save(self, *args, **kwargs):
         if self.shipping_company == 'PP':
             self.shipping_price = 15
@@ -82,6 +83,7 @@ class Shipping(models.Model):
 
 
 class Order(models.Model):
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, null=True, blank=True)
     user = models.ForeignKey(CustomerUser, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

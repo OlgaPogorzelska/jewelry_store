@@ -1,0 +1,24 @@
+{% extends 'cart/base.html' %}
+{% block content %}
+
+    <table>
+        <h2>Zakupione produkt</h2>
+        <tr>
+            <th></th>
+            <th>Produkt</th>
+            <th>Ilość</th>
+            <th>Cena</th>
+        </tr>
+        {% for item in order_items %}
+        <tr>
+        <td>    </td>
+        <td> {{ item.product.name }}</td>
+        <td> {{ item.quantity }}</td>
+        <td> {{ item.get_total_price }} zł</td>
+        </tr>
+        {% endfor %}
+    </table>
+<p>Dostawa: {{ shipping.get_shipping_price }}</p>
+<p>Razem zapłaconeo {{ order.total_price }} zł<p>
+
+{% endblock %}

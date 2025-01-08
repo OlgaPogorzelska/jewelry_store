@@ -32,6 +32,7 @@
         <p>Twój koszyk jest pusty.</p>
         {% endfor %}
     </table>
+    <button type="submit">Zaktualizuj ilości</button>
 
     <h2>Dostawa:</h2>
     <div class="shipping-options">
@@ -47,13 +48,13 @@
     </div>
 
     <h4>Do zapłaty: {{ total_price_with_shipping }} zł</h4>
-    <button type="submit">Zaktualizuj ilości</button>
 
+    <button type="submit" name="order">Zamawiam</button>
     {% else %}
     <p>Twój koszyk jest pusty.</p>
     {% endif %}
+
     </form>
-
-
-{% endif %}
+    <button><a href="{% url 'main_view' %}">Powrót do sklepu</a></button>
+{%endif%}
 {% endblock %}

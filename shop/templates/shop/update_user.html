@@ -1,17 +1,20 @@
 {%  extends 'shop/base.html' %}
 {% block content %}
-<h1>Edit </h1>
+<h1>Edytowanie </h1>
 <form action="{% url 'update_user' user.pk %}" method="post">
     {% csrf_token %}
+    <input type="hidden" name="next" value="{{ request.GET.next }}">
     {{ form.as_p }}
     {%for field in form %}
         {% for error in field.errors %}
             <div class="error">{{ error }}</div>
         {% endfor %}
     {% endfor %}
-    <button type="submit">Edit</button>
+    <button type="submit">Zapisz</button>
+    {% if not form_order %}
     <a href="{% url 'change_password' %}">Zmiana hasła</a>
     <a href="{% url 'main_view' %}">Wróć do konta</a>
+    {% endif %}
 </form>
 
 {% endblock %}

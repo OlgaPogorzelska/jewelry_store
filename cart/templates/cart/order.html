@@ -1,0 +1,38 @@
+{% extends 'cart/base.html' %}
+
+{% block content %}
+<h1>Podsumowanie zamówienia</h1>
+    {% for item in cart_items %}
+    <table>
+        <tr>
+            <th></th>
+            <th>Produkt</th>
+            <th>Ilość</th>
+            <th>Cena</th>
+        </tr>
+        <tr>
+        <td>    </td>
+        <td> {{ item.product.name }}</td>
+        <td> {{ item.quantity }}</td>
+        <td> {{ item.get_total_price }} zł</td>
+    </tr>
+    </table>
+    {% endfor %}
+    <p>Dane odbiorcy: {{ user }}</p>
+    <p>{{ shipping.get_shipping_email }}</p>
+    <p>tel: {{ user.phone_number}}</p>
+    <p>Shipping Address : {{ user.full_street }}, {{ user.postal_code }} {{ user.city }} {{ user.country }}</p>
+    <button><a href="{% url 'update_user' user_id %}?next={% url 'order_details' cart.pk %}">Edytuj</a></button>
+    <p>Shipping Company: {{ shipping_company }}</p>
+    <p>Shipping Price: {{ shipping_price }}</p>
+    <h3>Do zapłaty: {{ total_price_with_shipping}} zł</h3>
+    <button><a href="{% url 'main_view' %}">Powrót do sklepu</a></button>
+    <button><a href="{% url 'cart_details' cart.pk %}">Powrót do koszyka</a></button>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" >Zakup</button>
+</form>
+
+{% endblock %}
+

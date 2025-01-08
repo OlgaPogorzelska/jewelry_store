@@ -5,6 +5,7 @@
   <title>UniqOl</title>
 </head>
 <body>
+{% if not minimal_header %}
 <a href="{% url 'main_view' %}"><h1>UniqOl</h1></a>
 <ul>
     {% for category in categories %}
@@ -12,15 +13,18 @@
       {% endfor %}
 </ul>
 {% if user.is_authenticated %}
-                <a href="{% url 'cart_details' user.pk %}">Koszyk</a>
-                <p>Witaj, {{ user.first_name }} {{user.last_name}}!</p>
-                <a href="{% url 'user_details'  user.pk %}">Konto</a>
-                <a href="{% url 'logout' %}">Logout</a>
-            {% else %}
-
-                <a href="{% url 'login_view' %}">Login</a>
-                <a href="{% url 'register_view' %}">Signup</a>
-            {% endif %}
+    {% if cart %}
+        <a href="{% url 'cart_details' cart.pk %}">Koszyk</a>
+    {% endif %}
+    <button><a href="{% url 'user_orders' user.pk %}">Zamówienia</a></button>
+    <p>Witaj, {{ user.first_name }} {{ user.last_name }}!</p>
+    <a href="{% url 'user_details' user.pk %}">Konto</a>
+    <a href="{% url 'logout' %}">Logout</a>
+{% else %}
+    <a href="{% url 'login_view' %}">Login</a>
+    <a href="{% url 'register_view' %}">Signup</a>
+{% endif %}
+{% endif %}
 {% block content %}
 
 {% endblock %}
