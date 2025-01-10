@@ -194,6 +194,13 @@ class ProductsListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         categories = Category.objects.all()
+        # Sprawdzenie, czy użytkownik jest zalogowany
+        if self.request.user.is_authenticated:
+            # Jeżeli użytkownik jest zalogowany, pobierz koszyk
+            cart = Cart.objects.filter(user=self.request.user).first()
+        else:
+            # Jeśli użytkownik nie jest zalogowany, ustaw pusty koszyk lub przekieruj
+            cart = None  # lub: cart = Cart.objects.none()
         context['categories'] = categories
         return context
 
@@ -205,6 +212,13 @@ class ProductView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         categories = Category.objects.all()
+        # Sprawdzenie, czy użytkownik jest zalogowany
+        if self.request.user.is_authenticated:
+            # Jeżeli użytkownik jest zalogowany, pobierz koszyk
+            cart = Cart.objects.filter(user=self.request.user).first()
+        else:
+            # Jeśli użytkownik nie jest zalogowany, ustaw pusty koszyk lub przekieruj
+            cart = None  # lub: cart = Cart.objects.none()
         # context['product'] = self.get_object() nie potrzebuje bo DetailView sama mi to zrobi
         context['images'] = ProductImages.objects.filter(product=self.object)
         context['SIZE'] = SIZE

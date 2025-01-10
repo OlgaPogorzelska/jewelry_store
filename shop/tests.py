@@ -190,7 +190,6 @@ def test_login_valid_data(client, kamil):
 
 @pytest.mark.django_db
 def test_login_invalid_data(client, kamil):
-
     response = client.post('/login/', {
         'email': kamil.email,
         'password': 'niepoprawnehaslo'
@@ -198,15 +197,14 @@ def test_login_invalid_data(client, kamil):
     form = response.context['form']
     assert response.status_code == 200
     assert not response.wsgi_request.user.is_authenticated
-    assert form.errors #???
+    assert form.errors  # ???
+
 
 @pytest.mark.django_db
 def test_logout(client, kamil):
-
     client.login(email=kamil.email, password='kamil123')
 
-    response = client.get('/logout/')# get, ponieważ w view użyliśmy get do logout, czy nie powinien być post?
+    response = client.get('/logout/')  # get, ponieważ w view użyliśmy get do logout, czy nie powinien być post?
 
     assert response.status_code == 302
     assert not response.wsgi_request.user.is_authenticated
-
