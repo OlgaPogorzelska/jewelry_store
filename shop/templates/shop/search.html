@@ -1,29 +1,21 @@
-{%  extends 'shop/base.html' %}
+{% extends 'shop/base.html' %}
 {% block content %}
-<form action="{% url 'search' %}" method="post">
-    {% csrf_token %}
-    {{ form }}
-    <input type="submit" value="Szukaj">
-</form>
-{% if products %}
-<ul>
-    {% for product in products %}
-    <img src="{{ product.productimages_set.first.image.url  }}" alt="{{ item.product.name }}"
-         style="max-width: 300px; max-height: 300px;"/>
-    <a href="{% url 'product_details' product.pk %}">{{ product.name }} {{ product.price }}</a>
-    </li>
-    {% endfor %}
-</ul>
-{% endif %}
-{% if categories %}
-<ul>
-    {% for category in categories %}
-    {% for product in category.product_set.all %}
-    <li><img src="{{ product.productimages_set.first.image.url  }}" alt="{{ item.product.name }}"
-         style="max-width: 300px; max-height: 300px;"/>
-        <a href="{% url 'product_details' product.pk %}">{{ product.name }} {{ product.price }}</a></li>
-    {% endfor %}
-    {% endfor %}
-</ul>
-{% endif %}
+<div class="search-result-container">
+    <form action="{% url 'search' %}" method="post">
+        {% csrf_token %}
+        <div class="products-grid">
+            {% if products %}
+                {% for product in products %}
+                <div class="product-card">
+                    <a href="{% url 'product_details' product.pk %}">
+                        <img src="{{ product.productimages_set.first.image.url }}" alt="{{ product.name }}">
+                        <p class="product-name">{{ product.name }}</p>
+                        <p>{{ product.price }} zł</p>
+                    </a>
+                </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </form>
+</div>
 {% endblock %}

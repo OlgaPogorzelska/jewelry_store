@@ -1,0 +1,59 @@
+{% extends 'shop/base.html' %}
+
+{% block content %}
+<div class="order-summary-container">
+
+        <!-- Dane odbiorcy -->
+        <div class="recipient-info">
+            <p class="recipient-info-title">Dane odbiorcy: </p>
+            <p class="user-name-text">{{ user }}</p>
+            <p>{{ user.full_street }}</p>
+            <p>{{ user.postal_code }} {{ user.city }} </p>
+            <p>tel: +48 {{ user.phone_number }}</p>
+            <p>{{ shipping.get_shipping_email }}</p><br>
+            <a href="{% url 'update_user' user_id %}?next={% url 'order_details' cart.pk %}">Edytuj</a>
+        </div>
+
+        <!-- Wartość koszyka po prawej -->
+        <div class="cart-values-container">
+            <div class="cart-values>"></div>
+                <p class="cart-values-title">Wartość koszyka: {{ total_price_with_shipping }} zł</p>
+                <p>Koszt dostawy: {{ shipping_price }} zł</p>
+                <p>Wartość produktów: {{ cart.get_total_price_cart }} zł</p>
+                <!-- Formularz zakupu -->
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit">Zakup</button>
+                </form>
+            </div>
+        </div>
+
+
+
+    <div class="product-table-container">
+        <!-- Tabela z produktami oraz firma kurierska i cena -->
+        <table class="product-table">
+            <tbody>
+                {% for item in cart_items %}
+                <tr>
+                    <td>
+                        <img src="{{ item.product.productimages_set.first.image.url }}" alt="{{ item.product.name }}" class="order-product-img" />
+                    </td>
+                    <td class="table-product-name">{{ item.product.name }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ item.get_total_price }} zł</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Firma kurierska i cena -->
+        <div class="shipping-info">
+            <p>Firma kurierska: {{ shipping_company_name }}</p>
+            <p class="shipping-price">{{ shipping_price }} zł</p>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

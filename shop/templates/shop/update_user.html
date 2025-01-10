@@ -1,17 +1,26 @@
 {%  extends 'shop/base.html' %}
 {% block content %}
-<h1>Edit </h1>
-<form action="{% url 'update_user' user.pk %}" method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    {%for field in form %}
-        {% for error in field.errors %}
-            <div class="error">{{ error }}</div>
-        {% endfor %}
-    {% endfor %}
-    <button type="submit">Edit</button>
-    <a href="{% url 'change_password' %}">Zmiana hasła</a>
-    <a href="{% url 'main_view' %}">Wróć do konta</a>
-</form>
+<div class="update-user-container">
+    <h1>Edytowanie </h1>
+    <form action="{% url 'update_user' user.pk %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.GET.next }}">
 
+        {{ form.as_p }}
+
+        {%for field in form %}
+            {% for error in field.errors %}
+                <div class="error">{{ error }}</div>
+            {% endfor %}
+        {% endfor %}
+        <button type="submit">Zapisz zmiany</button>
+        {% if not form_order %}
+        <div class="secondary-buttons">
+            <a href="{% url 'user_details' user.pk %}" class="small-button">Wróć do konta</a>
+            <a href="{% url 'change_password' %}" class="small-button">Zmiana hasła</a>
+
+        </div>
+        {% endif %}
+    </form>
+</div>
 {% endblock %}

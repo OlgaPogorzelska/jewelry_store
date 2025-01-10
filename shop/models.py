@@ -13,7 +13,7 @@ def validate_postal_code(postal_code):
             and postal_code[2] == '-' and postal_code[3:].isdigit()):
         return True
     else:
-        raise ValidationError("Postal code must be in the format 'XX-XXX'.")
+        raise ValidationError("Kod pocztowy musi być w formacie 'XX-XXX'.")
 
 
 def validate_house_number(house_number):
@@ -25,7 +25,7 @@ def validate_house_number(house_number):
     if re.match(pattern, house_number):
         return True
     else:
-        raise ValidationError("House number must be a number with an "
+        raise ValidationError("Numer domu must contain only digits and an "
                               "optional letter at the end. "
                               "Examples: '123', '456A'")
 
@@ -49,14 +49,14 @@ def validate_alpha(name):
     if name.isalpha():
         return True
     else:
-        raise ValidationError("Name must contain only letters.")
+        raise ValidationError("Musi zawierać tylko litery.")
 
 
 def validate_digit(number):
     if number.isdigit():
         return True
     else:
-        raise ValidationError("Number must contain only digits.")
+        raise ValidationError("Musi zawierać tylko cyfry.")
 
 
 def validate_phone_numer(phone_number):

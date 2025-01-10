@@ -7,7 +7,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import PasswordChangeView, PasswordResetView
 from shop.forms import RegistrationUserForm, UserLoginForm, SearchForm
 from shop.models import CustomerUser, Category, Product, ProductImages, SIZE
-from cart.models import Cart, CartItem
+from cart.models import Cart, CartItem, Order
 
 
 class StartView(View):
@@ -17,7 +17,52 @@ class StartView(View):
 
     def get(self, request, *args, **kwargs):
         categories = Category.objects.all()
-        return render(request, 'shop/base.html', {'categories': categories})
+        cart = None
+        form = SearchForm()
+        if request.user.is_authenticated:
+            cart, carted = Cart.objects.get_or_create(user=request.user)
+        return render(request, 'shop/base.html', {
+            'categories': categories,
+            'cart': cart,
+            'form': form,
+            'home_banner': True
+        })
+
+
+class AboutUsView(View):
+    def get(self, request, *args, **kwargs):
+        categories = Category.objects.all()
+        return render(request, 'shop/about_us.html', {
+            'categories': categories,
+            'is_home': True
+        })
+
+
+class CareView(View):
+    def get(self, request, *args, **kwargs):
+        categories = Category.objects.all()
+        return render(request, 'shop/care.html', {
+            'categories': categories,
+            'is_home': True
+        })
+
+
+class ContactView(View):
+    def get(self, request, *args, **kwargs):
+        categories = Category.objects.all()
+        return render(request, 'shop/contact.html', {
+            'categories': categories,
+            'is_home': True
+        })
+
+
+class SizeView(View):
+    def get(self, request, *args, **kwargs):
+        categories = Category.objects.all()
+        return render(request, 'shop/size.html', {
+            'categories': categories,
+            'is_home': True
+        })
 
 
 class RegistrationView(CreateView):
@@ -31,36 +76,49 @@ class RegistrationView(CreateView):
         user.save()
         return super().form_valid(form)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categories'] = Category.objects.all()  # Dodanie kategorii do kontekstu
+        return context
+
 
 class UserLoginView(FormView):
     form_class = UserLoginForm
     template_name = 'shop/login.html'
     success_url = reverse_lazy('main_view')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        categories = Category.objects.all()
+        context['categories'] = categories
+        return context
+
     def form_valid(self, form):
         login(self.request, form.user)
+        cart, created = Cart.objects.get_or_create(user=form.user)
 
-        #Dodanie produktów z sesji do koszyka
+        # Dodanie produktów z sesji do koszyka
         if 'cart_items' in self.request.session:
             cart_items = self.request.session['cart_items']
-            print(self.request.session.get('cart_items', []))
-            cart, carted = Cart.objects.get_or_create(user=form.user)
             for item_data in cart_items:
                 item_id = item_data.get('pk')
                 size = item_data.get('size')
                 product = get_object_or_404(Product, pk=item_id)
                 CartItem.objects.create(cart=cart, product=product, size=size)
 
-            print(f"Added products from session to cart for user {form.user.email}")
-            #Po dodaniu produktów do koszyka usuwa z sesji
+            # Po dodaniu produktów do koszyka usuwa z sesji
             del self.request.session['cart_items']
-
 
         next_url = self.request.GET.get('next')
         cart = Cart.objects.get(user=form.user)
         if next_url:
             return redirect(reverse('cart_details', kwargs={'pk': cart.pk}))
+        print(f"User {form.user.username} logged in successfully.")
         return super().form_valid(form)
+
+    def form_invalid(self, form):
+        print("Login failed.")
+        return super().form_invalid(form)
 
 
 class LogoutView(View):
@@ -75,11 +133,16 @@ class UserDetailsView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        cart = Cart.objects.filter(user=self.request.user).first()
+        categories = Category.objects.all()
+        context['categories'] = categories
+        context['cart'] = cart
+        context['hide_menu'] = False
         context['user'] = self.get_object()
         return context
 
 
-class UserUpdateView(LoginRequiredMixin, UpdateView):  # Dodać PermissionRequiredMixin ?
+class UserUpdateView(LoginRequiredMixin, UpdateView):
     model = CustomerUser
     fields = ['first_name', 'last_name', 'email', 'phone_number', 'street',
               'house_number', 'apartment_number', 'city', 'postal_code',
@@ -87,22 +150,37 @@ class UserUpdateView(LoginRequiredMixin, UpdateView):  # Dodać PermissionRequir
     template_name = 'shop/update_user.html'
     success_url = reverse_lazy('main_view')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        cart = Cart.objects.filter(user=self.request.user).first()
+        categories = Category.objects.all()
+        context['categories'] = categories
+        context['cart'] = cart
+        context['hide_menu'] = False
+        context['form_order'] = 'next' in self.request.GET
+        context['minimal_header'] = 'next' in self.request.GET
+        context['order_id'] = self.request.GET.get('next')
+        return context
+
+    def get_success_url(self):
+        next_url = self.request.POST.get('next') or self.request.GET.get('next')
+        if next_url:
+            return next_url
+        return reverse_lazy('main_view')
+
 
 class ChangeUserPasswordView(LoginRequiredMixin, PasswordChangeView):
     template_name = 'shop/change_pwd.html'
     success_url = reverse_lazy('main_view')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        cart = Cart.objects.filter(user=self.request.user).first()
+        context['cart'] = cart
+        categories = Category.objects.all()
+        context['categories'] = categories
+        return context
 
-# class ResetUserPasswordView(PasswordResetView): Do zrobienia pózniej
-#     template_name = 'shop/reset_pwd.html'
-#     success_url = reverse_lazy('main_view')
-
-
-# class CategoryView(ListView):
-#     model = Category
-#     context_object_name = 'categories'
-#     template_name = 'shop/category.html'
-#
 
 class ProductsListView(ListView):
     model = Product
@@ -111,16 +189,13 @@ class ProductsListView(ListView):
 
     def get_queryset(self):
         category_id = self.kwargs['pk']  # Pobranie ID kategorii z URL
-        return Product.objects.filter(category_id=category_id).select_related('category')
+        return Product.objects.filter(category_id=category_id).distinct()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        category = Category.objects.get(pk=self.kwargs['pk'])
-        context['category'] = self.get_object()
+        categories = Category.objects.all()
+        context['categories'] = categories
         return context
-
-    def get_object(self, queryset=None):
-        return Category.objects.get(pk=self.kwargs['pk'])
 
 
 class ProductView(DetailView):
@@ -129,23 +204,34 @@ class ProductView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        categories = Category.objects.all()
         # context['product'] = self.get_object() nie potrzebuje bo DetailView sama mi to zrobi
         context['images'] = ProductImages.objects.filter(product=self.object)
         context['SIZE'] = SIZE
+        context['categories'] = categories
+        context['banner_hide'] = True
         return context
 
 
 class SearchFormView(View):
-    def get(self, request, *args, **kwargs):
-        form = SearchForm()
-        return render(request, 'shop/search.html', {'form': form})
-
     def post(self, request, *args, **kwargs):
         form = SearchForm(request.POST)
+        categories_menu = Category.objects.all()
+
         if form.is_valid():
             search = form.cleaned_data['search']
-            products = Product.objects.filter(name__icontains=search)
-            categories = Category.objects.filter(name__icontains=search)
-            form = SearchForm()
-            return render(request, 'shop/search.html', {'form': form, 'products': products, 'categories': categories})
-        return render(request, 'shop/search.html', {'form': form})
+            # Wyszukiwanie po nazwie i opisie
+            products = Product.objects.filter(name__icontains=search) | Product.objects.filter(
+                description__icontains=search)
+
+            form = SearchForm()  # Reset formularza
+            return render(request, 'shop/search.html', {
+                'form': form,
+                'products': products,
+                'categories': categories_menu
+            })
+
+        return render(request, 'shop/search.html', {
+            'form': form,
+            'categories': categories_menu
+        })

@@ -1,28 +1,108 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>UniqOl</title>
+    <link rel="stylesheet" href="{% static 'shop/css/base.css' %}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-<a href="{% url 'main_view' %}"><h1>UniqOl</h1></a>
-<ul>
-    {% for category in categories %}
-          <li><a href="{% url 'products_list' category.pk %}">{{ category.name }}</a></li>
-      {% endfor %}
-</ul>
-{% if user.is_authenticated %}
-                <a href="{% url 'cart_details' user.pk %}">Koszyk</a>
-                <p>Witaj, {{ user.first_name }} {{user.last_name}}!</p>
-                <a href="{% url 'user_details'  user.pk %}">Konto</a>
-                <a href="{% url 'logout' %}">Logout</a>
-            {% else %}
 
-                <a href="{% url 'login_view' %}">Login</a>
-                <a href="{% url 'register_view' %}">Signup</a>
-            {% endif %}
-{% block content %}
+    <header class ="header-container">
+        <div class="search-container">
+            <form action="{% url 'search' %}" method="post">
+                {% csrf_token %}
+                <input type="text" name="search" placeholder="Szukaj" required>
+                <button type="submit" class="search-button">
+                    <img src="{% static 'shop/img/search.png' %}" alt="Szukaj">
+                </button>
+            </form>
+        </div>
 
-{% endblock %}
+        <div class="logo-container">
+            <a href="{% url 'main_view' %}">
+                <h1>UniqOl</h1>
+            </a>
+        </div>
+
+        <div class="auth-cart-container">
+
+            <!-- Koszyk  -->
+            <div class="cart-container">
+                {% if user.is_authenticated and cart%}
+                <a href="{% url 'cart_details' cart.pk %}">
+                    <img src="{% static 'shop/img/cart-ikon.png' %}" alt="Cart">
+                </a>
+                {% else %}
+                    <a href="{% url 'login_view' %}">
+                        <img src="{% static 'shop/img/cart-ikon.png' %}" alt="Cart">
+                    </a>
+                {% endif %}
+            </div>
+            <!-- Logowanie -->
+            <div class="login-container">
+                {% if user.is_authenticated %}
+                <div class="user-dropdown">
+                    <a href="javascript:void(0)">
+                        <img src="{% static 'shop/img/login-ikon.png' %}" alt="User">
+                    </a>
+                    <!-- Menu rozwijane -->
+                    <div class="dropdown-menu">
+                        <a href="{% url 'user_details' user.pk %}">Konto</a>
+                        <a href="{% url 'user_orders' user.pk %}">Zamówienia</a>
+                        <a href="{% url 'logout' %}">Wyloguj</a>
+                    </div>
+                </div>
+                {% else %}
+                    <a href="{% url 'login_view' %}">
+                        <img src="{% static 'shop/img/login-ikon.png' %}" alt="User">
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+</header>
+
+    <nav class="categories-menu">
+    <ul>
+        {% for category in categories %}
+            <li><a href="{% url 'products_list' category.pk %}">{{ category.name }}</a></li>
+        {% endfor %}
+            <li><a href="{% url 'about_us' %}">O NAS</a></li>
+    </ul>
+    </nav>
+
+
+    <!--- Banner -->
+    <div class="banner-image">
+        {% if is_home %}
+        <img src="{% static 'shop/img/banner.jpg' %}" alt="Banner" />
+        {% elif home_banner %}
+        <img class="home-banner" src="{% static 'shop/img/banner.jpg' %}" alt="Banner" />
+        {% endif %}
+    </div>
+
+
+    <main>
+    {% block content %}
+    {% endblock %}
+    </main>
+
+
+<footer>
+        <div id="footer-info"></div>
+            <p>&copy; 2025 UniqOl. Wszelkie prawa zastrzeżone.</p> <!-- Przykładowa treść -->
+        </div>
+        <div id="footer-links">
+            <ul>
+                <li><a href="{% url 'about_us' %}">O nas</a></li>
+                <li><a href="{% url 'contact' %}">Kontakty</a></li>
+                <li>Regulamin</li>
+                <li><a href="{% url 'sizes' %}">Rozmiary</a></li>
+                <li><a href="{% url 'care' %}">Pielęgnacja</a></li>
+            </ul>
+        </div>
+</footer>
+
 </body>
 </html>

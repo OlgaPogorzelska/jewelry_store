@@ -1,9 +1,11 @@
 {%  extends 'shop/base.html' %}
 {% block content %}
-<h1>Change password</h1>
-<form action="{% url 'change_password' %}" method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Dodaj">
-</form>
+<div class="change-password-container">
+    <h1>Zmiana hasła</h1>
+    <form action="{% url 'change_password' %}" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Zapisz zmiany</button>
+    </form>
+</div>
 {% endblock %}
