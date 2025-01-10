@@ -41,7 +41,7 @@ class AboutUsView(View):
 class CareView(View):
     def get(self, request, *args, **kwargs):
         categories = Category.objects.all()
-        return render(request, 'shop/about_us.html', {
+        return render(request, 'shop/care.html', {
             'categories': categories,
             'is_home': True
         })
@@ -50,7 +50,7 @@ class CareView(View):
 class ContactView(View):
     def get(self, request, *args, **kwargs):
         categories = Category.objects.all()
-        return render(request, 'shop/about_us.html', {
+        return render(request, 'shop/contact.html', {
             'categories': categories,
             'is_home': True
         })
@@ -59,7 +59,7 @@ class ContactView(View):
 class SizeView(View):
     def get(self, request, *args, **kwargs):
         categories = Category.objects.all()
-        return render(request, 'shop/about_us.html', {
+        return render(request, 'shop/size.html', {
             'categories': categories,
             'is_home': True
         })
@@ -235,4 +235,3 @@ class SearchFormView(View):
             'form': form,
             'categories': categories_menu
         })
-
