@@ -26,13 +26,16 @@ from cart import views as carts
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.StartView.as_view(), name='main_view'),
+    path('about/', views.AboutUsView.as_view(), name='about_us'),
+    path('care/', views.CareView.as_view(), name='care'),
+    path('contact/', views.ContactView.as_view(), name='contact'),
+    path('sizes/', views.SizeView.as_view(), name='sizes'),
     path('register/', views.RegistrationView.as_view(), name='register_view'),
     path('login/', views.UserLoginView.as_view(), name='login_view'),
     path('logout/', views.LogoutView.as_view(), name='logout'),
     path('user/<int:pk>/', views.UserDetailsView.as_view(), name='user_details'),
     path('edit_user/<int:pk>/', views.UserUpdateView.as_view(), name='update_user'),
     path('change_pwd/', views.ChangeUserPasswordView.as_view(), name='change_password'),
-    # path('category/', views.CategoryView.as_view(), name='category'),
     path('category/<int:pk>/', views.ProductsListView.as_view(), name='products_list'),
     path('product/<int:pk>/', views.ProductView.as_view(), name='product_details'),
     path('cart/add/<int:pk>/', carts.AddToCart.as_view(), name='add_to_cart'),
@@ -43,6 +46,7 @@ urlpatterns = [
     path('order/<int:pk>/shipping/', carts.ShippingDetailsView.as_view(), name='shipping_details'),
     path('user/<int:pk>/orders/', carts.UserOrdersListView.as_view(), name='user_orders'),
     path('orders/<int:order_pk>/', carts.UserOrderDetailsView.as_view(), name='user_order_details'),
+    # path('invoice/<int:pk>/', carts.InvoiceView.as_view(), name='invoice'),
 
 ]
 

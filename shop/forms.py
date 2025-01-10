@@ -7,7 +7,7 @@ from shop.models import CustomerUser, Product, Category, ProductImages
 
 
 class RegistrationUserForm(forms.ModelForm):
-    confirm_password = forms.CharField(widget=forms.PasswordInput)
+    confirm_password = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Powtórz hasło'}))
 
     class Meta:
         model = CustomerUser
@@ -16,7 +16,17 @@ class RegistrationUserForm(forms.ModelForm):
                   'country', 'password']
 
         widgets = {
-            'password': forms.PasswordInput
+            'first_name': forms.TextInput(attrs={'placeholder': 'Imię'}),
+            'last_name': forms.TextInput(attrs={'placeholder': 'Nazwisko'}),
+            'email': forms.EmailInput(attrs={'placeholder': 'Email'}),
+            'phone_number': forms.TextInput(attrs={'placeholder': 'Numer telefonu'}),
+            'street': forms.TextInput(attrs={'placeholder': 'Ulica'}),
+            'house_number': forms.TextInput(attrs={'placeholder': 'Nr domu'}),
+            'apartment_number': forms.TextInput(attrs={'placeholder': 'Nr mieszkania'}),
+            'city': forms.TextInput(attrs={'placeholder': 'Miasto'}),
+            'postal_code': forms.TextInput(attrs={'placeholder': 'Kod pocztowy'}),
+            'country': forms.TextInput(attrs={'placeholder': 'Kraj'}),
+            'password': forms.PasswordInput(attrs={'placeholder': 'Hasło'}),
         }
 
     def clean(self):
@@ -27,10 +37,15 @@ class RegistrationUserForm(forms.ModelForm):
             self.add_error('confirm_password', 'The passwords are not the same')
         return cd
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for key, field in self.fields.items():
+            field.label = ""
+
 
 class UserLoginForm(forms.Form):
-    email = forms.CharField()
-    password = forms.CharField(widget=forms.PasswordInput)
+    email = forms.CharField(widget=forms.EmailInput(attrs={'placeholder': 'Email'}))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Hasło'}))
 
     def clean(self):
         cd = super().clean()
@@ -42,6 +57,11 @@ class UserLoginForm(forms.Form):
                                   password or login!''')
         else:
             self.user = user
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for key, field in self.fields.items():
+            field.label = ""
 
 
 class SearchForm(forms.Form):

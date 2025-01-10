@@ -1,13 +1,44 @@
-{%  extends 'cart/base.html' %}
+{%  extends 'shop/base.html' %}
 {% block content %}
+<div class="orders-container">
     {% if orders %}
-    <ul>
-      {% for order in orders %}
-          <li><a href="{% url 'user_order_details' order.pk %}">Zamówienie nr {{ order.pk }} </a></li>
-      {% endfor %}
-    </ul>
+        <table class="orders-table">
+            <thead>
+                <tr>
+                    <th>Id zamówienia</th>
+                    <th>Data zamówienia</th>
+                    <th>Status wysyłki</th>
+                    <th>Koszt</th>
+                    <th>Akcje</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                    <tr>
+                        <td>{{ order.pk }}</td>
+                        <td>{{ order.created_at|date:"d-m-Y" }}</td>
+                        <td>
+                            {% with shippings|default_if_none:"" as order_shipping %}
+                                {% for shipping in shippings %}
+                                    {% if shipping.order.id == order.id %}
+                                        {{ shipping.get_status_display }}
+                                    {% endif %}
+                                {% endfor %}
+                            {% endwith %}
+                        </td>
+                        <td>{{ order.total_price }} zł</td>
+                        <td>
+                            <div class="details-link">
+                                <a href="{% url 'user_order_details' order.pk %}">Szczegóły</a>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     {% else %}
-        <p>Brak zamówień></p>
+        <p>Brak zamówień</p>
     {% endif %}
+</div>
 {% endblock %}
 

@@ -1,24 +1,43 @@
-{% extends 'cart/base.html' %}
+{% extends 'shop/base.html' %}
 {% block content %}
-
+<div class="order-details-container">
+    <div class="customer-details">
+        <h3>Dane rozliczeniowe</h3>
+        <p>Imię i nazwisko: {{ order.user.first_name }} {{ order.user.last_name }}</p>
+        <p>Adres: {{ order.user.full_street }}, {{ order.user.postal_code }} {{ order.user.city }}, {{ order.user.country }}</p>
+        <p>Telefon: {{ order.user.phone_number }}</p>
+        <p>Email: {{ order.user.email }}</p><br>
+    </div>
+<h2>Nr zamówienia {{ order.pk }}</h2>
+    <p>Złożono: {{ order.created_at|date:"d-m-Y H:i:s" }}</p>
     <table>
-        <h2>Zakupione produkt</h2>
-        <tr>
-            <th></th>
-            <th>Produkt</th>
-            <th>Ilość</th>
-            <th>Cena</th>
-        </tr>
-        {% for item in order_items %}
-        <tr>
-        <td>    </td>
-        <td> {{ item.product.name }}</td>
-        <td> {{ item.quantity }}</td>
-        <td> {{ item.get_total_price }} zł</td>
-        </tr>
-        {% endfor %}
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Produkt</th>
+                <th>Ilość</th>
+                <th>Cena</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in order_items %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ item.product.name }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.price }} zł</td>
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
-<p>Dostawa: {{ shipping.get_shipping_price }}</p>
-<p>Razem zapłaconeo {{ order.total_price }} zł<p>
+
+
+
+    <div class="order-summary">
+        <p>Cena: {{ total_price_without_shipping }} zł</p>
+        <p>Dostawa: {{ shipping.get_shipping_price }} zł</p>
+        <p>Łączna kwota: {{ order.total_price }} zł</p>
+    </div>
+</div>
 
 {% endblock %}

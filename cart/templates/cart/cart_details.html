@@ -1,60 +1,97 @@
-{% extends 'cart/base.html' %}
+{% extends 'shop/base.html' %}
+{% load static %}
 
 {% block content %}
+<div class="cart-container">
+    <form method="post">
+        {% csrf_token %}
+        {% if user.is_authenticated %}
+        {% if cart_items %}
+        <table class="cart-table">
+            <tr>
+                <th>Img</th>
+                <th>Nazwa</th>
+                <th>Ilość</th>
+                <th>Rozmiar</th>
+                <th>Suma</th>
+                <th></th>
+            </tr>
+            {% for item in cart_items %}
+            <tr>
+                <td>
+                    <img src="{{ item.product.productimages_set.first.image.url }}" alt="{{ item.product.name }}"
+                         class="cart-product-img" />
+                </td>
+                <td>{{ item.product.name }}</td>
+                <td>
+                    <input type="hidden" name="item_pk_{{ forloop.counter }}" value="{{ item.pk }}">
+                    <input type="number" name="quantity_{{ forloop.counter }}" value="{{ item.quantity }}" min="1"
+                           class="quantity-input" />
+                </td>
+                <td>{% if item.size %}{{ item.size }}{% endif %}</td>
+                <td>{{ item.get_total_price }} zł</td>
+                <td><a href="{% url 'remove_from_cart' item.pk %}" class="remove-item-btn">X</a></td>
+            </tr>
+            {% endfor %}
+        </table>
 
-<form method="post">
-    {% csrf_token %}
-    {% if user.is_authenticated %}
-    {% if cart_items %}
-    <table>
-        <tr>
-            <th>Img</th>
-            <th>Nazwa</th>
-            <th>Ilość</th>
-            <th>Suma</th>
-            <th>Rozmiar</th>
-            <th></th>
-        </tr>
-        {% for item in cart_items %}
-        <tr>
-            <td><img src="{{ item.product.productimages_set.first.image.url }}" alt="{{ item.product.name }}"
-                     style="max-width: 100px; max-height: 100px;"/></td>
-            <td>{{ item.product.name }}</td>
-            <td>
-                <input type="hidden" name="item_pk_{{ forloop.counter }}" value="{{ item.pk }}">
-                <input type="number" name="quantity_{{ forloop.counter }}" value="{{ item.quantity }}" min="1"/>
-            </td>
-            <td>{{ item.get_total_price }} zł</td>
-            <td>{% if item.size %}{{ item.size }}{% endif %}</td>
-            <td><a href="{% url 'remove_from_cart' item.pk %}">X</a></td>
-        </tr>
-        {% empty %}
+        <!-- Przycisk odświeżania -->
+        <div class="update-container">
+            <button type="submit" class="update-cart-btn">
+                <img src="{% static 'shop/img/update.png' %}" alt="Zaktualizuj koszyk">
+            </button>
+        </div>
+
+        <!-- Sekcja z dostawą, payment-info i summary -->
+        <div class="cart-details-container">
+
+            <!-- Sekcja dostawy -->
+            <div class="shipping-options">
+                <h3>Dostawa:</h3>
+                {% for option in shipping_options %}
+                <label>
+                    <div class="shipping-option-text">
+                        <input type="radio" name="shipping_company" value="{{ option.code }}"
+                               {% if request.session.shipping_company == option.code %}checked{% endif %}
+                               onchange="this.form.submit()">
+                        <span class="shipping-name">{{ option.name }}</span>
+                        <span class="shipping-price">{{ option.price }} zł</span>
+                    </div>
+                </label>
+                {% endfor %}
+            </div>
+
+            <!-- Informacja o numerze konta -->
+            <div class="payment-info">
+                <p class="payment-text">
+                    <span class="payment-title">Płatności:</span> <br>
+                    Proszę przelać kwotę na nr konta:
+                    <span class="account-number">PL49 1020 2892 2276 3005 0000 0000</span>.
+                    W tytule podać imię i nazwisko.</p>
+            </div>
+
+            <!-- Podsumowanie -->
+            <div class="summary-container">
+                <p>Razem: {{ cart.get_total_price_cart }} zł</p>
+                <p>Koszt dostawy: {{ shipping_price }} zł</p>
+                <p class="total-price-cart">Do zapłaty: {{ total_price_with_shipping }} zł</p>
+            </div>
+
+        </div>
+
+        <!-- Przyciski: Powrót i Zamawiam -->
+        <div class="buttons-container">
+            <button type="button" class="return-to-shop-btn">
+                <a href="{% url 'main_view' %}" style="color: inherit; text-decoration: none;">Kontynuuj zakupy</a>
+            </button>
+            <button type="submit" name="order" class="order-btn">Zamawiam</button>
+        </div>
+
+        {% else %}
         <p>Twój koszyk jest pusty.</p>
-        {% endfor %}
-    </table>
-    <button type="submit">Zaktualizuj ilości</button>
-
-    <h2>Dostawa:</h2>
-    <div class="shipping-options">
-    {% for option in shipping_options %}
-    <label>
-        <input type="radio" name="shipping_company" value="{{ option.code }}"
-               {% if request.session.shipping_company == option.code %}checked{% endif %}
-               onchange="this.form.submit()">
-        <span>{{ option.name }}</span>
-        <span>{{ option.price }} zł </span>
-    </label><br>
-    {% endfor %}
-    </div>
-
-    <h4>Do zapłaty: {{ total_price_with_shipping }} zł</h4>
-
-    <button type="submit" name="order">Zamawiam</button>
-    {% else %}
-    <p>Twój koszyk jest pusty.</p>
-    {% endif %}
-
+        {% endif %}
+        {% endif %}
     </form>
-    <button><a href="{% url 'main_view' %}">Powrót do sklepu</a></button>
-{%endif%}
+
+</div>
 {% endblock %}

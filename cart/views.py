@@ -1,15 +1,17 @@
 from decimal import Decimal
 
 from django.contrib import messages
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.shortcuts import redirect, get_object_or_404, render
 from django.urls import reverse, reverse_lazy
 from django.views import View
 from django.views.generic import DetailView, UpdateView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import models, transaction
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
 from cart.models import Cart, CartItem, Order, Shipping, OrderItem
-from shop.models import Product, CustomerUser
+from shop.models import Product, CustomerUser, Category
 
 
 class AddToCart(View):
@@ -74,11 +76,23 @@ class CartView(LoginRequiredMixin, DetailView):
             {'code': 'IN', 'name': 'InPost', 'price': 18},
             {'code': 'DP', 'name': 'DPD', 'price': 20},
         ]
+        categories = Category.objects.all()
+        context['categories'] = categories
 
         selected_shipping_code = self.request.session.get('shipping_company')
         selected_shipping_price = next((option['price'] for option in context['shipping_options']
                                         if option['code'] == selected_shipping_code), 0)
 
+        #Ustawianie domyslnej wrtosci
+        if not selected_shipping_code:
+            selected_shipping_code = 'PP'  # Domyślnie Poczta Polska
+            selected_shipping_price = 15  # Domyślna cena
+
+            # Zapisz w sesji
+            self.request.session['shipping_company'] = selected_shipping_code
+            self.request.session['shipping_price'] = selected_shipping_price
+
+        context['shipping_price'] = selected_shipping_price
         context['total_price_with_shipping'] = context['cart'].get_total_price_cart() + selected_shipping_price
 
         # order = Order.objects.filter(cart=self.object).first()
@@ -157,12 +171,27 @@ class OrderView(LoginRequiredMixin, View):
         shipping_price = request.session.get('shipping_price')
         total_price_with_shipping = cart.get_total_price_cart() + Decimal(shipping_price)
 
+        # Opcje dostawy
+        shipping_options = [
+            {'code': 'PP', 'name': 'Poczta Polska', 'price': 15},
+            {'code': 'IN', 'name': 'InPost', 'price': 18},
+            {'code': 'DP', 'name': 'DPD', 'price': 20},
+        ]
+
+        # Wyciąganie wybranej opcji dostawy
+        selected_shipping_code = request.session.get('shipping_company')
+        selected_shipping_option = next(
+            (option for option in shipping_options if option['code'] == selected_shipping_code), None)
+
         return render(request, 'cart/order.html', {
             'cart': cart,
             'shipping_company': request.session.get('shipping_company'),
+            'shipping_company_name': selected_shipping_option['name'] if selected_shipping_option else '',
+            'shipping_price': shipping_price,
             'cart_items': CartItem.objects.filter(cart=cart),
             'total_price_with_shipping': total_price_with_shipping,
-            'user_id': request.user.pk
+            'user_id': request.user.pk,
+            'categories': Category.objects.all()
         })
 
     @transaction.atomic
@@ -171,9 +200,11 @@ class OrderView(LoginRequiredMixin, View):
         cart = get_object_or_404(Cart, pk=cart_pk)
         # Oblicz całkowitą cenę z przedmiotów w koszyku
         total_price = cart.get_total_price_cart()
+        shipping_price = request.session.get('shipping_price', 15)
+        total_price_with_shipping = total_price + shipping_price
 
         # Tworzenie zamówienia
-        order = Order.objects.create(user=request.user, cart=cart, total_price=total_price)
+        order = Order.objects.create(user=request.user, cart=cart, total_price=total_price_with_shipping)
 
         # Sprawdź czy są elementy w koszyku
         cart_items = CartItem.objects.filter(cart=cart)
@@ -193,7 +224,10 @@ class OrderView(LoginRequiredMixin, View):
         shipping_company = request.session.get('shipping_company')
 
         if shipping_company:
-            Shipping.objects.create(user=request.user, order=order, shipping_company=shipping_company)
+            Shipping.objects.create(user=request.user,
+                                    order=order,
+                                    shipping_company=shipping_company,
+                                    shipping_price=shipping_price)
 
         # Usunięcie wszystkich elementów koszyka
         cart_items.delete()
@@ -215,6 +249,16 @@ class UserOrdersListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         return Order.objects.filter(user=self.request.user)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        categories = Category.objects.all()
+        context['categories'] = categories
+        shippings = Shipping.objects.filter(user=self.request.user)
+        cart = Cart.objects.filter(user=self.request.user).first()
+        context['cart'] = cart
+        context['shippings'] = shippings
+        return context
+
 
 class UserOrderDetailsView(LoginRequiredMixin, DetailView):
     model = Order
@@ -234,13 +278,52 @@ class UserOrderDetailsView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         order = self.get_object()
+        categories = Category.objects.all()
+        context['categories'] = categories
+        shipping_price = Shipping.objects.filter(order=order).first().shipping_price
+        total_price_without_shipping = order.total_price - shipping_price
 
         # Upewnij się, że zamówienie ma przypisany koszyk
         if not order.cart:
             raise Http404("Zamówienie nie ma przypisanego koszyka.")
 
+        cart = Cart.objects.filter(user=self.request.user).first()
+        context['cart'] = cart
+
         # Dodaj szczegóły zamówienia do kontekstu
         context['order_items'] = OrderItem.objects.filter(order=order)
         context['shipping'] = Shipping.objects.filter(order=order).first()
+        context['total_price_without_shipping'] = total_price_without_shipping
 
         return context
+
+
+# class InvoiceView(LoginRequiredMixin, View):
+#     def get(self, request, *args, **kwargs):
+#         order_id = kwargs['pk']
+#         order = get_object_or_404(Order, pk=order_id)
+#
+#         # Tworzenie odpowiedzi HTTP dla PDF
+#         response = HttpResponse(content_type='application/pdf')
+#         response['Content-Disposition'] = f'attachment; filename="faktura_{order.id}.pdf"'
+#
+#         # Tworzenie PDF za pomocą ReportLab
+#         p = canvas.Canvas(response, pagesize=letter)
+#         width, height = letter
+#
+#         # Dodawanie treści do PDF
+#         p.drawString(100, height - 100, f'Faktura - {order.id}')
+#         p.drawString(100, height - 120, f'Data zamówienia: {order.created_at}')
+#
+#         # Dodawanie produktów do faktury
+#         y_position = height - 160
+#         for item in order.orderitem_set.all():
+#             p.drawString(100, y_position, f'{item.product.name} - Ilość: {item.quantity} - Cena: {item.price}')
+#             y_position -= 20
+#
+#         p.drawString(100, y_position - 20, f'Łączna kwota: {order.total_price_with_shipping}')
+#
+#         p.showPage()
+#         p.save()
+#
+#         return response

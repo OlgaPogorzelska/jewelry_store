@@ -1,16 +1,26 @@
 {%  extends 'shop/base.html' %}
 {% block content %}
+<div class="login-form-container">
     <form action="{% url 'login_view' %}" method="POST" >
         {% csrf_token %}
-        {{ form.as_p }}
 
-        {% if form.non_field_errors %}
-            <div class="error">{{ form.non_field_errors }}</div>
-        {% endif %}
+        <h2>Logowanie</h2>
+        {{form.as_p }}
+
+        {% for field in form %}
+            {% for error in field.errors %}
+                <div class="error">{{ error }}</div>
+            {% endfor %}
+        {% endfor %}
+
+
 
         <input type="hidden" name="next" value="{{ request.GET.next|default:'' }}">
-        <input type="submit" value="Login">
-        <a href="{% url 'register_view' %}">I don't have account</a>
+        <button type="submit" value="Login">Zaloguj się</button>
+        <div class="register-link">
+        <a href="{% url 'register_view' %}">Nie masz konta?</a>
+        </div>
     </form>
+</div>
 {% endblock %}
 

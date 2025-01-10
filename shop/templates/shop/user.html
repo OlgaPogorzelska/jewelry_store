@@ -1,12 +1,17 @@
 {%  extends 'shop/base.html' %}
 {% block content %}
+<div class="user-details-container">
     {% if user.is_authenticated %}
-        <h1>Szczegóły konta użytkownika</h1>
+        <h1>Dane użytkownika</h1>
         <p>Imię: {{user.first_name}}</p>
         <p>Nazwisko: {{user.last_name}}</p>
         <p>Email: {{user.email}}</p>
         <p>Telefon: {{ user.phone_number }}</p>
-        <p>Adres: ul.{{user.full_street}}, {{user.postal_code}} {{user.city}} {{user.country}}</p>
-        <a href="{% url 'update_user' user.pk %}">Edit</a>
+        <p>Adres: ul.{{user.full_street}}, <br>
+            {{user.postal_code}} {{user.city}} {{user.country}}</p>
+        <a href="{% url 'update_user' user.pk %}" class="small-button">Edit</a>
+    {% else %}
+        <p>Proszę się zalogować, aby zobaczyć szczegóły konta.</p>
     {% endif %}
+</div>
 {% endblock %}

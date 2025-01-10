@@ -14,8 +14,8 @@ import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
-
+# BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -80,7 +80,7 @@ WSGI_APPLICATION = 'jewelry_store.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
 
@@ -125,11 +125,12 @@ LOGIN_URL = '/login/'
 STATIC_URL = 'static/'
 # Ustawienia dla plików mediów
 MEDIA_URL = '/media/'
-# Tylko do testów lokalnych!
-# CSRF_COOKIE_SECURE = False wyłaczenie zabezpieczenie CSRF
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Katalog, w którym będą przechowywane przesyłane pliki
 
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),  # lub odpowiednia ścieżka do katalogu statycznego
+]
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 

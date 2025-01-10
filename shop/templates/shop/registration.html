@@ -1,16 +1,15 @@
 {%  extends 'shop/base.html' %}
 {% block content %}
-<h1>Rejestracja</h1>
-<form action="" method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    {%for field in form %}
-        {% for error in field.errors %}
-            <div class="error">{{ error }}</div>
-        {% endfor %}
-    {% endfor %}
-    <button type="submit">Signup</button>
-    <a href="{% url 'login_view' %}">Already have account</a>
-</form>
+<div class="register-form-container">
+    <h2>Rejestracja</h2>
+    <form action="" method="post">
+        {% csrf_token %}
 
+        {{ form.as_p }}
+        <button type="submit">Zarejestruj</button>
+        <div class="login-link">
+        <a href="{% url 'login_view' %}">Mam już konta</a>
+        </div>
+    </form>
+</div>
 {% endblock %}

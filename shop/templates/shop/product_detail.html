@@ -1,31 +1,40 @@
 {%  extends 'shop/base.html' %}
 {% block content %}
-        <h1>{{product.name}}</h1>
-        <div>
+    <div class="product-detail-container">
+        <h1 class="product-name">{{product.name}}</h1>
+        <div class="product-info">
+            <div class="product-images">
             {% for image in images %}
-                <img src="{{ image.image.url }}" alt="{{ product.name }}" style="max-width: 200px; max-height: 200px;"/>
+                <img src="{{ image.image.url }}" alt="{{ product.name }}"/>
             {% endfor %}
+            </div>
+            <div class="product-description">
+                <br>
+                <p><span class="price-label">Cena:</span> <span class="product-price">{{ product.price }} zł</span></p>
+                <p class="border-under1">Opis </p>
+                <p>{{product.description}}</p>
+                <form method="post" action="{% url 'add_to_cart' product.pk %}">
+                    {% csrf_token %}
+                    {% if product.category.name == "PIERŚCIONKI" %}
+                        <label for="size">Wybierz rozmiar:</label>
+                        <select name="size" id="size" required>
+                            {% for size in SIZE %}
+                                <option value="{{ size.0 }}">{{ size.1 }}</option>
+                            {% endfor %}
+                        </select>
+                        <p class="note"> Jeśli potrzebujesz inny rozmiar, lub masz inna wizję tego pierścionka napisz do mnie maila na pogorzelska0496@gmail.com <br> lub zostaw wiadomość na instagramie.</p>
+                    {% endif %}
+                    {% if product.stock == 0 %}
+                         <p>Produkt niedostępny</p>
+                    {% else %}
+                    <br>
+                        <button type="submit">Dodaj do koszyka</button>
+                    {% endif %}
+                </form>
+            </div>
         </div>
-        <p>Cena: {{product.price}}</p>
-        <p>Opis: {{product.description}}</p>
-
-        <form method="post" action="{% url 'add_to_cart' product.pk %}">
-            {% csrf_token %}
-            {% if product.category.name == "PIERŚCIONKI" %}
-            <label for="size">Wybierz rozmiar:</label>
-            <select name="size" id="size" required>
-                <option value="">-- Wybierz rozmiar --</option>
-                {% for size in SIZE %}
-                    <option value="{{ size.0 }}">{{ size.1 }}</option>
-                {% endfor %}
-            </select>
-            {% endif %}
-            {% if product.stock == 0 %}
-                <p>Produkt niedostępny</p>
-            {% else %}
-            <button type="submit">Dodaj do koszyka</button>
-            {% endif %}
-        </form>
-
-
+        <p class="border-under2">Pielęgnacja</p>
+        <p class="note-2">Aby Twoja biżuteria służyła Ci jak najdłużej, zadbaj o nią odpowiednio. Przechowuj ją w suchym miejscu, z dala od środków chemicznych.
+        Pamiętaj, że elementy pozłacane są delikatne i mogą się ścierać z czasem </p>
+    </div>
 {% endblock %}
