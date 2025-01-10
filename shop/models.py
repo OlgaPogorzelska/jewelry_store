@@ -25,9 +25,9 @@ def validate_house_number(house_number):
     if re.match(pattern, house_number):
         return True
     else:
-        raise ValidationError("Numer domu must contain only digits and an "
-                              "optional letter at the end. "
-                              "Examples: '123', '456A'")
+        raise ValidationError("Numer domu musi zawierać tylko cyfry i "
+                                "opcjonalną literę na końcu."
+                                "Przykłady: '123', '456A'")
 
 
 def validate_street_name(street):
@@ -63,8 +63,8 @@ def validate_phone_numer(phone_number):
     if phone_number.isdigit() and len(phone_number) == 9:
         return True
     else:
-        raise ValidationError("Phone number must contain only digits and "
-                              "must be 9 digits long.")
+        raise ValidationError("Numer telefonu musi zawierać tylko cyfry i "
+                                "musi mieć 9 cyfr.")
 
 
 SIZE = (
