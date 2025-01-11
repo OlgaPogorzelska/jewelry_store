@@ -1,3 +1,4 @@
+from django.http import Http404
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy, reverse
 from django.views import View
@@ -113,7 +114,6 @@ class UserLoginView(FormView):
         cart = Cart.objects.get(user=form.user)
         if next_url:
             return redirect(reverse('cart_details', kwargs={'pk': cart.pk}))
-        print(f"User {form.user.username} logged in successfully.")
         return super().form_valid(form)
 
     def form_invalid(self, form):
@@ -137,7 +137,6 @@ class UserDetailsView(LoginRequiredMixin, DetailView):
         categories = Category.objects.all()
         context['categories'] = categories
         context['cart'] = cart
-        context['hide_menu'] = False
         context['user'] = self.get_object()
         return context
 
@@ -167,6 +166,13 @@ class UserUpdateView(LoginRequiredMixin, UpdateView):
         if next_url:
             return next_url
         return reverse_lazy('main_view')
+
+    def get_object(self, queryset=None):
+        # Jeśli użytkownik nie jest właścicielem konta, zgłoś błąd 404
+        obj = super().get_object(queryset)
+        if obj != self.request.user:
+            raise Http404("You are not allowed to edit this user's data.")
+        return obj
 
 
 class ChangeUserPasswordView(LoginRequiredMixin, PasswordChangeView):

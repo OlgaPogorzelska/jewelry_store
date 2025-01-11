@@ -5,8 +5,7 @@ from shop.models import CustomerUser
 
 @pytest.fixture
 def kamil(db):
-    return CustomerUser.objects.create_user(
-        username='kwait@gmail.com',
+    return CustomerUser.objects.create(
         email='kwait@gmail.com',
         first_name='Kamil',
         last_name='Kwiatkowski',
@@ -52,5 +51,9 @@ def kasia():
         city='Poznań',
         postal_code='60-106',
         country='Polska',
+        password='kamil123',
 
     )
+
+
+

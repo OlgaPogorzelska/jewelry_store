@@ -296,34 +296,3 @@ class UserOrderDetailsView(LoginRequiredMixin, DetailView):
         context['total_price_without_shipping'] = total_price_without_shipping
 
         return context
-
-
-# class InvoiceView(LoginRequiredMixin, View):
-#     def get(self, request, *args, **kwargs):
-#         order_id = kwargs['pk']
-#         order = get_object_or_404(Order, pk=order_id)
-#
-#         # Tworzenie odpowiedzi HTTP dla PDF
-#         response = HttpResponse(content_type='application/pdf')
-#         response['Content-Disposition'] = f'attachment; filename="faktura_{order.id}.pdf"'
-#
-#         # Tworzenie PDF za pomocą ReportLab
-#         p = canvas.Canvas(response, pagesize=letter)
-#         width, height = letter
-#
-#         # Dodawanie treści do PDF
-#         p.drawString(100, height - 100, f'Faktura - {order.id}')
-#         p.drawString(100, height - 120, f'Data zamówienia: {order.created_at}')
-#
-#         # Dodawanie produktów do faktury
-#         y_position = height - 160
-#         for item in order.orderitem_set.all():
-#             p.drawString(100, y_position, f'{item.product.name} - Ilość: {item.quantity} - Cena: {item.price}')
-#             y_position -= 20
-#
-#         p.drawString(100, y_position - 20, f'Łączna kwota: {order.total_price_with_shipping}')
-#
-#         p.showPage()
-#         p.save()
-#
-#         return response
