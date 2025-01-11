@@ -34,7 +34,7 @@ class RegistrationUserForm(forms.ModelForm):
         pwd1 = cd.get('password')
         pwd2 = cd.get('confirm_password')
         if pwd1 and pwd2 and pwd1 != pwd2:
-            self.add_error('confirm_password', 'The passwords are not the same')
+            self.add_error('confirm_password', 'Hasła się nie zgadzają!!')
         return cd
 
     def __init__(self, *args, **kwargs):
@@ -51,12 +51,14 @@ class UserLoginForm(forms.Form):
         cd = super().clean()
         email = cd.get('email')
         pwd = cd.get('password')
-        user = authenticate(username=email, password=pwd)
-        if user is None:
-            raise ValidationError('''You entered the wrong 
-                                  password or login!''')
-        else:
-            self.user = user
+        if email and pwd:
+            user = authenticate(username=email, password=pwd)
+            if user is None:
+                raise ValidationError('''Wpisałeś nieprawidłowe
+                        hasło lub login!''')
+            else:
+                self.user = user
+        return cd
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

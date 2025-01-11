@@ -26,8 +26,8 @@ def validate_house_number(house_number):
         return True
     else:
         raise ValidationError("Numer domu musi zawierać tylko cyfry i "
-                                "opcjonalną literę na końcu."
-                                "Przykłady: '123', '456A'")
+                              "opcjonalną literę na końcu."
+                              "Przykłady: '123', '456A'")
 
 
 def validate_street_name(street):
@@ -40,9 +40,9 @@ def validate_street_name(street):
     if re.match(pattern, street):
         return True
     else:
-        raise ValidationError("Street name must contain only letters, "
-                              "spaces, and optional numbers at the end. "
-                              "Examples: 'Kwiatowa', 'Kwiatowa 12'")
+        raise ValidationError("Nazwa ulicy musi zawierać tylko litery,"
+                              "spacje i opcjonalne cyfry na końcu."
+                              "Przykład: 'Jana Pawła II', 'Dywizjonu 303'.")
 
 
 def validate_alpha(name):
@@ -64,7 +64,7 @@ def validate_phone_numer(phone_number):
         return True
     else:
         raise ValidationError("Numer telefonu musi zawierać tylko cyfry i "
-                                "musi mieć 9 cyfr.")
+                              "musi mieć 9 cyfr.")
 
 
 SIZE = (
@@ -136,3 +136,6 @@ class Product(models.Model):
 class ProductImages(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='uploads/')
+
+    def __str__(self):
+        return self.product.name
